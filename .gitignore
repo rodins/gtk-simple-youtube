@@ -1,0 +1,4 @@
+# Ignore executable binary 'simple_youtube'
+simple_youtube
+
+*.txt
