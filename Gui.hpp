@@ -3,15 +3,27 @@
 #include <iostream>
 #include <gtk/gtk.h>
 
+#include "ColumnsEnum.hpp"
+
 using namespace std;
 
 class Gui {
     public:
     Gui() {
 		const string PROG_NAME("Simple youtube");
+		const int IV_RESULT_ITEM_WIDTH = 180;
+		const int SPINNER_SIZE = 32;
+		
         GtkWidget *window;
         GtkWidget *toolbar;
         GtkWidget *entry;
+        
+        GtkWidget *ivResults;
+        GtkWidget *swResults;
+        GtkWidget *spResults;
+        GtkWidget *btnResultsError;
+        GtkWidget *hbResultsError;
+        
         GtkWidget *vbox;
         
         gtk_init(0, NULL);
@@ -40,19 +52,64 @@ class Gui {
                          G_CALLBACK(entryActivated), 
                          NULL);
 	    gtk_toolbar_insert(GTK_TOOLBAR(toolbar), entryItem, -1);
-	    
 	    gtk_widget_show_all(toolbar);
+	    
+	    // Results icon view
+		// set model to ivResults
+	    // it's kind of not needed but it removes some error
+	    GtkTreeModel *model = GTK_TREE_MODEL(gtk_list_store_new(
+		     ICON_NUM_COLS,   // Number of columns
+		     GDK_TYPE_PIXBUF, // Image poster
+		     G_TYPE_STRING,   // Title
+		     G_TYPE_STRING,   // Href
+		     G_TYPE_STRING    // Image link
+	    ));
+	    
+	    ivResults = gtk_icon_view_new_with_model(model);
+	    gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(ivResults), ICON_IMAGE_COLUMN);                                                  
+	    gtk_icon_view_set_text_column(GTK_ICON_VIEW(ivResults), ICON_TITLE_COLUMN);
+	    gtk_icon_view_set_item_width(GTK_ICON_VIEW(ivResults), IV_RESULT_ITEM_WIDTH);
+	    
+	    swResults = createScrolledWindow();
+	    gtk_container_add(GTK_CONTAINER(swResults), ivResults);
+	    gtk_widget_show_all(swResults);
+	    
+	    spResults = gtk_spinner_new();
+	    gtk_widget_set_size_request(spResults, SPINNER_SIZE, SPINNER_SIZE);
+	    
+	    btnResultsError = gtk_button_new_with_label("Repeat");
+	    hbResultsError = gtk_hbox_new(FALSE, 1);
+	    gtk_box_pack_start(GTK_BOX(hbResultsError), 
+	                       btnResultsError, 
+	                       TRUE, 
+	                       FALSE, 
+	                       10);
 		
 		vbox = gtk_vbox_new(FALSE, 1);
 		gtk_box_pack_start(GTK_BOX(vbox), toolbar, FALSE, FALSE, 1);
+		gtk_box_pack_start(GTK_BOX(vbox), hbResultsError, TRUE, TRUE, 1);
+		gtk_box_pack_start(GTK_BOX(vbox), swResults, TRUE, TRUE, 1);
+		gtk_box_pack_start(GTK_BOX(vbox), spResults, TRUE, TRUE, 1);
+		
 		gtk_widget_show(vbox);
 		gtk_container_add(GTK_CONTAINER(window), vbox);
 		gtk_widget_show(window);
 		gtk_main();
     }
+    
     private:
     
-    static void entryActivated( GtkWidget *widget, void* data) {
+    GtkWidget* createScrolledWindow() {
+		GtkWidget* scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
+	    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledWindow),
+	                                   GTK_POLICY_AUTOMATIC, 
+	                                   GTK_POLICY_AUTOMATIC);
+	    gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolledWindow),
+	                                        GTK_SHADOW_ETCHED_IN);
+	    return scrolledWindow;
+	}
+    
+    static void entryActivated(GtkWidget *widget, void* data) {
         string query(gtk_entry_get_text(GTK_ENTRY(widget)));
         if(!query.empty()) {
 	        cout << query << endl;
