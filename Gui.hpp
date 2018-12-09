@@ -8,6 +8,9 @@
 using namespace std;
 
 class Gui {
+	GtkWidget *swResults;
+	GtkWidget *spResults;
+	GtkWidget *hbResultsError;
     public:
     Gui() {
 		const string PROG_NAME("Simple youtube");
@@ -19,10 +22,7 @@ class Gui {
         GtkWidget *entry;
         
         GtkWidget *ivResults;
-        GtkWidget *swResults;
-        GtkWidget *spResults;
         GtkWidget *btnResultsError;
-        GtkWidget *hbResultsError;
         
         GtkWidget *vbox;
         
@@ -50,7 +50,7 @@ class Gui {
 		g_signal_connect(entry,
                          "activate", 
                          G_CALLBACK(entryActivated), 
-                         NULL);
+                         this);
 	    gtk_toolbar_insert(GTK_TOOLBAR(toolbar), entryItem, -1);
 	    gtk_widget_show_all(toolbar);
 	    
@@ -78,18 +78,23 @@ class Gui {
 	    gtk_widget_set_size_request(spResults, SPINNER_SIZE, SPINNER_SIZE);
 	    
 	    btnResultsError = gtk_button_new_with_label("Repeat");
-	    hbResultsError = gtk_hbox_new(FALSE, 1);
+	    gtk_widget_show(btnResultsError);
+	    g_signal_connect(btnResultsError,
+                         "clicked",
+                         G_CALLBACK(btnResultsErrorClicked),
+                         NULL);
+	    hbResultsError = gtk_hbox_new(false, 1);
 	    gtk_box_pack_start(GTK_BOX(hbResultsError), 
 	                       btnResultsError, 
-	                       TRUE, 
-	                       FALSE, 
+	                       true, 
+	                       false, 
 	                       10);
 		
-		vbox = gtk_vbox_new(FALSE, 1);
-		gtk_box_pack_start(GTK_BOX(vbox), toolbar, FALSE, FALSE, 1);
-		gtk_box_pack_start(GTK_BOX(vbox), hbResultsError, TRUE, TRUE, 1);
-		gtk_box_pack_start(GTK_BOX(vbox), swResults, TRUE, TRUE, 1);
-		gtk_box_pack_start(GTK_BOX(vbox), spResults, TRUE, TRUE, 1);
+		vbox = gtk_vbox_new(false, 1);
+		gtk_box_pack_start(GTK_BOX(vbox), toolbar, false, false, 1);
+		gtk_box_pack_start(GTK_BOX(vbox), hbResultsError, true, false, 1);
+		gtk_box_pack_start(GTK_BOX(vbox), swResults, true, true, 1);
+		gtk_box_pack_start(GTK_BOX(vbox), spResults, true, false, 1);
 		
 		gtk_widget_show(vbox);
 		gtk_container_add(GTK_CONTAINER(window), vbox);
@@ -97,6 +102,27 @@ class Gui {
 		gtk_main();
     }
     
+    void showResultsLoadingIndicator() {
+		gtk_widget_show(spResults);
+		gtk_spinner_start(GTK_SPINNER(spResults));
+		gtk_widget_hide(swResults);
+		gtk_widget_hide(hbResultsError);
+	}
+	
+	void showResultsData() {
+		gtk_widget_hide(spResults);
+		gtk_spinner_stop(GTK_SPINNER(spResults));
+		gtk_widget_show(swResults);
+		gtk_widget_hide(hbResultsError);
+	}
+	
+	void showResultsError() {
+		gtk_widget_hide(spResults);
+		gtk_spinner_stop(GTK_SPINNER(spResults));
+		gtk_widget_hide(swResults);
+		gtk_widget_show(hbResultsError);
+	}
+	
     private:
     
     GtkWidget* createScrolledWindow() {
@@ -109,10 +135,15 @@ class Gui {
 	    return scrolledWindow;
 	}
     
-    static void entryActivated(GtkWidget *widget, void* data) {
+    static void entryActivated(GtkWidget *widget, Gui *gui) {
         string query(gtk_entry_get_text(GTK_ENTRY(widget)));
         if(!query.empty()) {
 	        cout << query << endl;
+	        gui->showResultsError();
 	    }		  						  
     }
+    
+    static void btnResultsErrorClicked(GtkWidget *widget, void* data) {
+		cout << "Button results error clicked" << endl;
+	}
 };
