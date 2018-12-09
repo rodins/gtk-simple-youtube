@@ -83,6 +83,14 @@ class Gui {
 	    gtk_container_add(GTK_CONTAINER(swResults), ivResults);
 	    gtk_widget_show_all(swResults);
 	    
+	    // IconView scroll to the bottom detection code
+	    GtkAdjustment *vadjustment;
+	    vadjustment = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(swResults));
+	    g_signal_connect(vadjustment, 
+	                     "value-changed",
+	                     G_CALLBACK(onScrollToBottom), 
+	                     NULL); 
+	    
 	    spResults = gtk_spinner_new();
 	    gtk_widget_set_size_request(spResults, SPINNER_SIZE, SPINNER_SIZE);
 	    
@@ -217,5 +225,15 @@ class Gui {
 		g_free(resultTitle);
 		g_free(videoId);
 		g_free(imageHref);
+	}
+	
+	static void onScrollToBottom(GtkAdjustment* adj, gpointer data) {
+		gdouble value = gtk_adjustment_get_value(adj);
+		gdouble upper = gtk_adjustment_get_upper(adj);
+		gdouble pageSize = gtk_adjustment_get_page_size(adj);
+		gdouble maxValue = upper - pageSize - pageSize/2;
+		if (value > maxValue) {
+			cout << "Append new results " << endl;
+		}
 	}
 };
