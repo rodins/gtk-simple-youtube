@@ -7,13 +7,17 @@ using namespace std;
 
 #include "ColumnsEnum.hpp"
 #include "IconsFactory.hpp"
+#include "ResultsView.hpp"
+#include "ResultsParser.hpp"
+#include "ResultsNet.hpp"
+#include "ResultsTask.hpp"
 
 class Gui {
-	GtkWidget *swResults;
-	GtkWidget *spResults;
-	GtkWidget *hbResultsError;
 	GtkListStore *resultsStore;
 	GdkPixbuf *defaultPixbuf;
+	
+	ResultsNet *resultsNet;
+	ResultsTask *resultsTask;
     public:
     Gui() {
 		const string PROG_NAME("Simple youtube");
@@ -29,7 +33,20 @@ class Gui {
         GtkWidget *ivResults;
         GtkWidget *btnResultsError;
         
+        GtkWidget *swResults;
+	    GtkWidget *spResults;
+	    GtkWidget *hbResultsError;
+        
         GtkWidget *vbox;
+        
+        /* Must initialize libcurl before any threads are started */ 
+        curl_global_init(CURL_GLOBAL_ALL);
+        //TODO: make autodetection of old gtk
+        //g_thread_init(NULL); // for Wary-5.5 (old gtk)
+    
+        gdk_threads_init ();
+        
+        gdk_threads_enter ();
         
         gtk_init(0, NULL);
         
@@ -116,28 +133,23 @@ class Gui {
 		gtk_widget_show(vbox);
 		gtk_container_add(GTK_CONTAINER(window), vbox);
 		gtk_widget_show(window);
+		
+		ResultsView resultsView(swResults, spResults, hbResultsError);
+		ResultsParser resultsParser;
+		resultsNet = new ResultsNet(&resultsParser, "apiKey");
+		resultsTask = new ResultsTask(&resultsView, resultsNet);
+		
 		gtk_main();
+		
+		gdk_threads_leave ();
+    
+        /* we're done with libcurl, so clean it up */ 
+	    curl_global_cleanup();
     }
     
-    void showResultsLoadingIndicator() {
-		gtk_widget_show(spResults);
-		gtk_spinner_start(GTK_SPINNER(spResults));
-		gtk_widget_hide(swResults);
-		gtk_widget_hide(hbResultsError);
-	}
-	
-	void showResultsData() {
-		gtk_widget_hide(spResults);
-		gtk_spinner_stop(GTK_SPINNER(spResults));
-		gtk_widget_show(swResults);
-		gtk_widget_hide(hbResultsError);
-	}
-	
-	void showResultsError() {
-		gtk_widget_hide(spResults);
-		gtk_spinner_stop(GTK_SPINNER(spResults));
-		gtk_widget_hide(swResults);
-		gtk_widget_show(hbResultsError);
+    ~Gui() {
+		free(resultsTask);
+		free(resultsNet);
 	}
 	
 	void addToResultsModel(string title, string videoId, string imageHref) {
@@ -186,7 +198,9 @@ class Gui {
     static void entryActivated(GtkWidget *widget, Gui *gui) {
         string query(gtk_entry_get_text(GTK_ENTRY(widget)));
         if(!query.empty()) {
-	        gui->addToResultsModel(query, query, query);
+	        //gui->addToResultsModel(query, query, query);
+	        gui->resultsNet->setQuery(query);
+	        gui->resultsTask->start();
 	    }		  						  
     }
     
