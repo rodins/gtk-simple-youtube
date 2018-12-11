@@ -1,5 +1,7 @@
+#include "FileUtils.hpp"
 #include "Gui.hpp"
 
 int main(int argc, char *argv[]) {
-	Gui gui;
+	string apiKey = FileUtils::getApiKeyFromFile();
+	Gui gui(apiKey);
 }

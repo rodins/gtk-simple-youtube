@@ -1,18 +1,9 @@
 // IconsFactory.hpp
 
 class IconsFactory {
-	static string get_progdir() {
-		char buff[PATH_MAX];
-	    ssize_t len = readlink("/proc/self/exe", buff, sizeof(buff)-1);
-	    if (len != -1) {
-	        buff[len] = '\0';
-	        return string(buff);
-	    }
-	    return "";
-	}
 	
 	static GdkPixbuf* create_pixbuf(const gchar* filename) {
-		string progpath = get_progdir();
+		string progpath = FileUtils::get_progdir();
 		gchar* progdir = g_path_get_dirname(progpath.c_str());
 		gchar* full_filename = g_build_filename(progdir, filename, NULL);
     

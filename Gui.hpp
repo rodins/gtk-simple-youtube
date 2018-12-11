@@ -1,9 +1,5 @@
 // Gui.hpp
-#include <string>
-#include <iostream>
 #include <gtk/gtk.h>
-
-using namespace std;
 
 #include "ColumnsEnum.hpp"
 #include "IconsFactory.hpp"
@@ -19,7 +15,7 @@ class Gui {
 	ResultsNet *resultsNet;
 	ResultsTask *resultsTask;
     public:
-    Gui() {
+    Gui(string apiKey) {
 		const string PROG_NAME("Simple youtube");
 		const int IV_RESULT_ITEM_WIDTH = 180;
 		const int SPINNER_SIZE = 32;
@@ -123,20 +119,28 @@ class Gui {
 	                       true, 
 	                       false, 
 	                       10);
+	                       
+	    GtkWidget *noApiKeyLabel = gtk_label_new("No youtube api key found. It should be a text file called key.txt in the application directory");
 		
 		vbox = gtk_vbox_new(false, 1);
 		gtk_box_pack_start(GTK_BOX(vbox), toolbar, false, false, 1);
 		gtk_box_pack_start(GTK_BOX(vbox), hbResultsError, true, false, 1);
 		gtk_box_pack_start(GTK_BOX(vbox), swResults, true, true, 1);
 		gtk_box_pack_start(GTK_BOX(vbox), spResults, true, false, 1);
+		gtk_box_pack_start(GTK_BOX(vbox), noApiKeyLabel, true, false, 1);
 		
 		gtk_widget_show(vbox);
 		gtk_container_add(GTK_CONTAINER(window), vbox);
 		gtk_widget_show(window);
 		
+		if(apiKey.empty()) {
+		    gtk_widget_hide(swResults);
+		    gtk_widget_show(noApiKeyLabel);	
+		}
+		
 		ResultsView resultsView(swResults, spResults, hbResultsError);
 		ResultsParser resultsParser;
-		resultsNet = new ResultsNet(&resultsParser, "apiKey");
+		resultsNet = new ResultsNet(&resultsParser, apiKey);
 		resultsTask = new ResultsTask(&resultsView, resultsNet);
 		
 		gtk_main();
