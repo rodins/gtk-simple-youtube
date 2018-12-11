@@ -64,6 +64,7 @@ class ResultsNet {
 			
 			if(res == CURLE_OK) {
 				parser->parse();
+				pageToken = parser->getNextPageToken();
 			}
 		}
 		return res;
