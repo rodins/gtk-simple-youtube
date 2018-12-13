@@ -19,7 +19,6 @@ class ResultsParser {
 	
 	void parse() {
 		nextPageToken = parseItem(json, "nextPageToken", ",");
-		cout << nextPageToken << endl;
 		string queryId = "\"id\":";
 		size_t id = json.find(queryId);
 		size_t nextId;
@@ -40,6 +39,7 @@ class ResultsParser {
 			gdk_threads_leave();
 			id = nextId;
 		}
+		json = "";
 	}
 	
 	private:

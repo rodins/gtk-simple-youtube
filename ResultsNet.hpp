@@ -62,7 +62,7 @@ class ResultsNet {
 	
 	CURLcode getResultsFromNet() {
 		string url = buildSearchListUrl();
-		cout << url << endl;
+		//cout << url << endl;
 		CURLcode res;		
 		if(curl_handle) {		    
 		    /* set url to get here */

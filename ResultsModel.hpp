@@ -1,19 +1,21 @@
 // ResultsModel.hpp
 
 class ResultsModel {
-    GtkListStore *resultsStore;
+    GtkListStore *store;
 	GdkPixbuf *defaultPixbuf;
     public:
     ResultsModel(GtkListStore *store) {
-		resultsStore = store;
+		this->store = store;
 		defaultPixbuf = IconsFactory::getBlankIcon();
+	}
+	
+	void clear() {
+		gtk_list_store_clear(store);
 	}
     
     void add(string title, string videoId, string imageHref) {
 		static GtkTreeIter iter;
 		static GdkPixbuf *pixbuf;
-		
-		gtk_list_store_append(resultsStore, &iter);
 		
 		/*if(imagesCache->count(imageHref) > 0) {
 			pixbuf = imagesCache->operator[](imageHref);
@@ -23,7 +25,8 @@ class ResultsModel {
 		
 		pixbuf = defaultPixbuf;
 		
-        gtk_list_store_set(resultsStore, 
+		gtk_list_store_append(store, &iter);
+        gtk_list_store_set(store,
                            &iter,
                            ICON_IMAGE_COLUMN, 
                            pixbuf,

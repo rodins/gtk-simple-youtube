@@ -9,6 +9,7 @@
 #include "ResultsTask.hpp"
 
 class Gui {
+	ResultsModel *resultsModel;
 	ResultsNet *resultsNet;
 	ResultsTask *resultsTask;
     public:
@@ -134,8 +135,8 @@ class Gui {
 		}
 		
 		ResultsView resultsView(swResults, spResults, hbResultsError);
-		ResultsModel resultsModel(resultsStore);
-		ResultsParser resultsParser(&resultsModel);
+		resultsModel = new ResultsModel(resultsStore);
+		ResultsParser resultsParser(resultsModel);
 		resultsNet = new ResultsNet(&resultsParser, apiKey);
 		resultsTask = new ResultsTask(&resultsView, resultsNet);
 		
@@ -150,6 +151,7 @@ class Gui {
     ~Gui() {
 		free(resultsTask);
 		free(resultsNet);
+		free(resultsModel);
 	}
 	
 	void startResultsTaskForQuery(string query) {
@@ -171,7 +173,7 @@ class Gui {
     static void entryActivated(GtkWidget *widget, Gui *gui) {
         string query(gtk_entry_get_text(GTK_ENTRY(widget)));
         if(!query.empty()) {
-	        //gui->addToResultsModel(query, query, query);
+	        gui->resultsModel->clear();
 	        gui->resultsNet->setQuery(query);
 	        gui->resultsTask->start();
 	    }		  						  
