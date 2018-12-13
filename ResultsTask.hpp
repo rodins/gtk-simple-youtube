@@ -33,6 +33,7 @@ class ResultsTask {
 		if(res == CURLE_OK) {
 			view->showData();
 		}else {
+			cout << curl_easy_strerror(res) << endl;
 			view->showError();
 		}
 	}
