@@ -1,3 +1,17 @@
+#include <string>
+#include <unistd.h>
+#include <fstream>
+#include <iostream>
+#include <stdlib.h>
+
+#include <glib.h>
+#include <glib/gstdio.h>
+#include <gtk/gtk.h>
+#include <curl/curl.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+using namespace std;
+
 #include "FileUtils.hpp"
 #include "Gui.hpp"
 

@@ -1,5 +1,4 @@
 // Gui.hpp
-#include <gtk/gtk.h>
 
 #include "ColumnsEnum.hpp"
 #include "IconsFactory.hpp"
@@ -20,7 +19,7 @@ class Gui {
 		const int IV_RESULT_ITEM_WIDTH = 180;
 		const int SPINNER_SIZE = 32;
 		
-		defaultPixbuf = IconsFactory::getBlankIcon();
+		//defaultPixbuf = IconsFactory::getBlankIcon();
 		
         GtkWidget *window;
         GtkWidget *toolbar;

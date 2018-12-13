@@ -1,12 +1,4 @@
 // FileUnitls.hpp
-#include <string>
-#include <unistd.h>
-#include <glib.h>
-#include <glib/gstdio.h>
-#include <fstream>
-#include <iostream>
-
-using namespace std;
 
 class FileUtils {
     public:
