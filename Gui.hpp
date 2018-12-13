@@ -3,14 +3,12 @@
 #include "ColumnsEnum.hpp"
 #include "IconsFactory.hpp"
 #include "ResultsView.hpp"
+#include "ResultsModel.hpp"
 #include "ResultsParser.hpp"
 #include "ResultsNet.hpp"
 #include "ResultsTask.hpp"
 
 class Gui {
-	GtkListStore *resultsStore;
-	GdkPixbuf *defaultPixbuf;
-	
 	ResultsNet *resultsNet;
 	ResultsTask *resultsTask;
     public:
@@ -18,8 +16,6 @@ class Gui {
 		const string PROG_NAME("Simple youtube");
 		const int IV_RESULT_ITEM_WIDTH = 180;
 		const int SPINNER_SIZE = 32;
-		
-		//defaultPixbuf = IconsFactory::getBlankIcon();
 		
         GtkWidget *window;
         GtkWidget *toolbar;
@@ -73,7 +69,7 @@ class Gui {
 	    
 	    // Results icon view
 		// set model to ivResults
-	    resultsStore = gtk_list_store_new(
+	    GtkListStore *resultsStore = gtk_list_store_new(
 		     ICON_NUM_COLS,   // Number of columns
 		     GDK_TYPE_PIXBUF, // Image poster
 		     G_TYPE_STRING,   // Title
@@ -138,7 +134,8 @@ class Gui {
 		}
 		
 		ResultsView resultsView(swResults, spResults, hbResultsError);
-		ResultsParser resultsParser;
+		ResultsModel resultsModel(resultsStore);
+		ResultsParser resultsParser(&resultsModel);
 		resultsNet = new ResultsNet(&resultsParser, apiKey);
 		resultsTask = new ResultsTask(&resultsView, resultsNet);
 		
@@ -153,33 +150,6 @@ class Gui {
     ~Gui() {
 		free(resultsTask);
 		free(resultsNet);
-	}
-	
-	void addToResultsModel(string title, string videoId, string imageHref) {
-		static GtkTreeIter iter;
-		static GdkPixbuf *pixbuf;
-		
-		gtk_list_store_append(resultsStore, &iter);
-		
-		/*if(imagesCache->count(imageHref) > 0) {
-			pixbuf = imagesCache->operator[](imageHref);
-		}else {
-			pixbuf = defaultPixbuf;
-		}*/
-		
-		pixbuf = defaultPixbuf;
-		
-        gtk_list_store_set(resultsStore, 
-                           &iter,
-                           ICON_IMAGE_COLUMN, 
-                           pixbuf,
-                           ICON_TITLE_COLUMN, 
-                           title.c_str(),
-                           ICON_VIDEO_ID, 
-                           videoId.c_str(),
-                           ICON_IMAGE_LINK, 
-                           imageHref.c_str(), 
-                           -1);
 	}
 	
 	void startResultsTaskForQuery(string query) {

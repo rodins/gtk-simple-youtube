@@ -1,13 +1,13 @@
 // ResultsParser.hpp
 
 class ResultsParser {
-    //ResultsModel *model;
+    ResultsModel *model;
     string json;
     string nextPageToken;
     public:
-    /*ResultsParser(ResultsModel *model) {
+    ResultsParser(ResultsModel *model) {
         this->model = model;
-    }*/
+    }
     
     void append(string data) {
 		json += data;
@@ -35,9 +35,9 @@ class ResultsParser {
 			string videoId = parseItem(itemJson, "videoId", "\n");
 			string title = parseItem(itemJson, "title", ",");
 			string imageUrl = parseItem(itemJson, "url", "\n");
-			cout << title << endl;
-			cout << videoId << endl;
-			cout << imageUrl << endl;
+			gdk_threads_enter();
+			model->add(title, videoId, imageUrl);
+			gdk_threads_leave();
 			id = nextId;
 		}
 	}

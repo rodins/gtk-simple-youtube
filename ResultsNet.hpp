@@ -73,7 +73,9 @@ class ResultsNet {
 			
 			if(res == CURLE_OK) {
 				parser->parse();
+				gdk_threads_enter();
 				pageToken = parser->getNextPageToken();
+				gdk_threads_leave();
 			}
 		}
 		return res;
