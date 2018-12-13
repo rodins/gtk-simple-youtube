@@ -1,5 +1,4 @@
 // ResultsNet.hpp
-#include <curl/curl.h>
 
 class ResultsNet {
     ResultsParser *parser;
@@ -8,20 +7,30 @@ class ResultsNet {
     
     CURL *curl_handle;
     
-    const string API_DOMAIN = "https://www.googleapis.com/youtube/v3/";
-    const string SEARCH = "search?";
-    const string PART = "part=snippet";
-    const string MAX_RESULTS = "&maxResults=15";
-    const string TYPE = "&type=video";
-    const string FIELDS = "&fields=items(id/videoId,snippet(thumbnails/default/url,title)),nextPageToken";
-    const string KEY = "&key=";
-    const string PAGE_TOKEN = "&pageToken=";
-    const string QUERY = "&q=";
+    string API_DOMAIN;
+    string SEARCH;
+    string PART;
+    string MAX_RESULTS;
+    string TYPE;
+    string FIELDS;
+    string KEY;
+    string PAGE_TOKEN;
+    string QUERY;
     
     string pageToken;
     
     public:
     ResultsNet(ResultsParser *parser, string apiKey) {
+	    API_DOMAIN = "https://www.googleapis.com/youtube/v3/";
+        SEARCH = "search?";
+        PART = "part=snippet";
+        MAX_RESULTS = "&maxResults=15";
+        TYPE = "&type=video";
+        FIELDS = "&fields=items(id/videoId,snippet(thumbnails/default/url,title)),nextPageToken";
+        KEY = "&key=";
+        PAGE_TOKEN = "&pageToken=";
+        QUERY = "&q=";
+		
 		this->parser = parser;
 		API_KEY = KEY + apiKey;
 		
