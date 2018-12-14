@@ -62,6 +62,17 @@ class Gui {
 		gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
 	    gtk_container_set_border_width(GTK_CONTAINER(toolbar), 2);
 	    
+	    GtkToolItem *btnCategories = gtk_toggle_tool_button_new_from_stock(GTK_STOCK_DIRECTORY);
+	    gtk_tool_item_set_tooltip_text(btnCategories, "Show/hide categories");
+		gtk_toolbar_insert(GTK_TOOLBAR(toolbar), btnCategories, -1);
+		g_signal_connect(GTK_WIDGET(btnCategories),
+                         "clicked", 
+                         G_CALLBACK(btnCategoriesClicked),
+                         NULL);
+	        
+	    GtkToolItem *sep = gtk_separator_tool_item_new();
+	    gtk_toolbar_insert(GTK_TOOLBAR(toolbar), sep, -1);
+	    
 	    entry = gtk_entry_new();
 	    gtk_widget_set_tooltip_text(entry, "Search youtube");
 		GtkToolItem *entryItem = gtk_tool_item_new();
@@ -231,5 +242,14 @@ class Gui {
 		if (value > maxValue) {
 			gui->resultsTask->start();
 		}
+	}
+	
+	static void btnCategoriesClicked(GtkToggleToolButton *btnCategories, 
+	                                 gpointer data) {
+		if(gtk_toggle_tool_button_get_active(btnCategories)) {
+			cout << "Show categories" << endl;
+		}else {
+			cout << "Hide categories" << endl;
+		}	
 	}
 };
