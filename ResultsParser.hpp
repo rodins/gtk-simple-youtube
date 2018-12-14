@@ -33,6 +33,7 @@ class ResultsParser {
 			}
 			string videoId = parseItem(itemJson, "videoId", "\n");
 			string title = parseItem(itemJson, "title", ",");
+			replace(title, "\\", ""); // replace escape character in title
 			string imageUrl = parseItem(itemJson, "url", "\n");
 			gdk_threads_enter();
 			model->add(title, videoId, imageUrl);
@@ -43,6 +44,14 @@ class ResultsParser {
 	}
 	
 	private:
+	
+	void replace(string &title, const string to_replace, const string replace_with) {
+		size_t entity_found = title.find(to_replace);
+		while(entity_found != string::npos){
+		    title.replace(entity_found, to_replace.length(),replace_with);
+			entity_found = title.find(to_replace, entity_found+1);// поиск следующего элемента в строке
+		}
+	}
 	
 	string parseItem(string js, string queryBegin, string queryEnd) {
 		const int BEGIN_ADD = 4; // ": " = four chars
