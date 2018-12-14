@@ -2,7 +2,10 @@
 #include <unistd.h>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <stdlib.h>
+#include <map>
+#include <set>
 
 #include <glib.h>
 #include <glib/gstdio.h>

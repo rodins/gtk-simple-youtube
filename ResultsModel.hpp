@@ -3,9 +3,11 @@
 class ResultsModel {
     GtkListStore *store;
 	GdkPixbuf *defaultPixbuf;
+	map<string, GdkPixbuf*> *imagesCache;
     public:
-    ResultsModel(GtkListStore *store) {
+    ResultsModel(GtkListStore *store, map<string, GdkPixbuf*> *imagesCache) {
 		this->store = store;
+		this->imagesCache = imagesCache;
 		defaultPixbuf = IconsFactory::getBlankIcon();
 	}
 	
@@ -17,13 +19,11 @@ class ResultsModel {
 		static GtkTreeIter iter;
 		static GdkPixbuf *pixbuf;
 		
-		/*if(imagesCache->count(imageHref) > 0) {
+		if(imagesCache->count(imageHref) > 0) {
 			pixbuf = imagesCache->operator[](imageHref);
 		}else {
 			pixbuf = defaultPixbuf;
-		}*/
-		
-		pixbuf = defaultPixbuf;
+		}
 		
 		gtk_list_store_append(store, &iter);
         gtk_list_store_set(store,

@@ -7,16 +7,21 @@
 #include "ResultsParser.hpp"
 #include "ResultsNet.hpp"
 #include "ResultsTask.hpp"
+#include "ImagesDownloader.hpp"
 
 class Gui {
 	ResultsModel *resultsModel;
 	ResultsNet *resultsNet;
 	ResultsTask *resultsTask;
+	set<int> *imageIndices;
     public:
     Gui(string apiKey) {
 		const string PROG_NAME("Simple youtube");
 		const int IV_RESULT_ITEM_WIDTH = 180;
 		const int SPINNER_SIZE = 32;
+		
+		imageIndices = new set<int>();
+	    map<string, GdkPixbuf*> *imagesCache = new map<string, GdkPixbuf*>();
 		
         GtkWidget *window;
         GtkWidget *toolbar;
@@ -135,10 +140,11 @@ class Gui {
 		}
 		
 		ResultsView resultsView(swResults, spResults, hbResultsError, vbox);
-		resultsModel = new ResultsModel(resultsStore);
+		resultsModel = new ResultsModel(resultsStore, imagesCache);
 		ResultsParser resultsParser(resultsModel);
 		resultsNet = new ResultsNet(&resultsParser, apiKey);
 		resultsTask = new ResultsTask(&resultsView, resultsNet);
+		ImagesDownloader imagesDownloader(ivResults, imageIndices, imagesCache);
 		
 		gtk_main();
 		
@@ -174,6 +180,7 @@ class Gui {
         string query(gtk_entry_get_text(GTK_ENTRY(widget)));
         if(!query.empty()) {
 	        gui->resultsModel->clear();
+	        gui->imageIndices->clear();
 	        gui->resultsNet->setQuery(query);
 	        gui->resultsTask->start();
 	    }		  						  
@@ -222,7 +229,6 @@ class Gui {
 		gdouble pageSize = gtk_adjustment_get_page_size(adj);
 		gdouble maxValue = upper - pageSize - pageSize/2;
 		if (value > maxValue) {
-			cout << "Append new results " << endl;
 			gui->resultsTask->start();
 		}
 	}
