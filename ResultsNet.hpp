@@ -57,7 +57,12 @@ class ResultsNet {
 	}
 		
 	void setQuery(string &query) {
+		pageToken = "";
 		this->query = query;
+	}
+	
+	bool isPaging() {
+		return !pageToken.empty();
 	}
 	
 	CURLcode getResultsFromNet() {

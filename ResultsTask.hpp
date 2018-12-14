@@ -34,7 +34,7 @@ class ResultsTask {
 			view->showData();
 		}else {
 			cout << curl_easy_strerror(res) << endl;
-			view->showError();
+			view->showError(net->isPaging());
 		}
 	}
 	
@@ -42,7 +42,7 @@ class ResultsTask {
 		// On pre execute
 		gdk_threads_enter();
 		ResultsTask *task = (ResultsTask*)arg1;
-		task->view->showLoadingIndicator();
+		task->view->showLoadingIndicator(task->net->isPaging());
 	    gdk_threads_leave();
 	    // async part
 		CURLcode res = task->net->getResultsFromNet();

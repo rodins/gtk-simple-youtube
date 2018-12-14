@@ -98,7 +98,7 @@ class Gui {
 	    g_signal_connect(vadjustment, 
 	                     "value-changed",
 	                     G_CALLBACK(onScrollToBottom), 
-	                     NULL); 
+	                     this); 
 	    
 	    spResults = gtk_spinner_new();
 	    gtk_widget_set_size_request(spResults, SPINNER_SIZE, SPINNER_SIZE);
@@ -120,8 +120,8 @@ class Gui {
 		
 		vbox = gtk_vbox_new(false, 1);
 		gtk_box_pack_start(GTK_BOX(vbox), toolbar, false, false, 1);
-		gtk_box_pack_start(GTK_BOX(vbox), hbResultsError, true, false, 1);
 		gtk_box_pack_start(GTK_BOX(vbox), swResults, true, true, 1);
+		gtk_box_pack_start(GTK_BOX(vbox), hbResultsError, true, false, 1);
 		gtk_box_pack_start(GTK_BOX(vbox), spResults, true, false, 1);
 		gtk_box_pack_start(GTK_BOX(vbox), noApiKeyLabel, true, false, 1);
 		
@@ -134,7 +134,7 @@ class Gui {
 		    gtk_widget_show(noApiKeyLabel);	
 		}
 		
-		ResultsView resultsView(swResults, spResults, hbResultsError);
+		ResultsView resultsView(swResults, spResults, hbResultsError, vbox);
 		resultsModel = new ResultsModel(resultsStore);
 		ResultsParser resultsParser(resultsModel);
 		resultsNet = new ResultsNet(&resultsParser, apiKey);
@@ -216,13 +216,14 @@ class Gui {
 		g_free(imageHref);
 	}
 	
-	static void onScrollToBottom(GtkAdjustment* adj, gpointer data) {
+	static void onScrollToBottom(GtkAdjustment* adj, Gui *gui) {
 		gdouble value = gtk_adjustment_get_value(adj);
 		gdouble upper = gtk_adjustment_get_upper(adj);
 		gdouble pageSize = gtk_adjustment_get_page_size(adj);
 		gdouble maxValue = upper - pageSize - pageSize/2;
 		if (value > maxValue) {
 			cout << "Append new results " << endl;
+			gui->resultsTask->start();
 		}
 	}
 };
