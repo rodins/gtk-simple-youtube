@@ -1,5 +1,12 @@
 // ColumnsEnum.hpp
 
+// For tree views
+enum {
+	IMAGE_COLUMN,
+	TITLE_COLUMN,
+	NUM_COLS
+};
+
 // For iconView and results model
 enum {
 	ICON_IMAGE_COLUMN,

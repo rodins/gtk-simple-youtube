@@ -8,17 +8,21 @@
 #include "ResultsNet.hpp"
 #include "ResultsTask.hpp"
 #include "ImagesDownloader.hpp"
+#include "CategoriesView.hpp"
 
 class Gui {
 	ResultsModel *resultsModel;
 	ResultsNet *resultsNet;
 	ResultsTask *resultsTask;
 	set<int> *imageIndices;
+	GtkWidget *vbCategories;
+	CategoriesView *categoriesView;
     public:
     Gui(string apiKey) {
 		const string PROG_NAME("Simple youtube");
 		const int IV_RESULT_ITEM_WIDTH = 180;
 		const int SPINNER_SIZE = 32;
+		const int SIDE_SIZE = 200;
 		
 		imageIndices = new set<int>();
 	    map<string, GdkPixbuf*> *imagesCache = new map<string, GdkPixbuf*>();
@@ -68,7 +72,7 @@ class Gui {
 		g_signal_connect(GTK_WIDGET(btnCategories),
                          "clicked", 
                          G_CALLBACK(btnCategoriesClicked),
-                         NULL);
+                         this);
 	        
 	    GtkToolItem *sep = gtk_separator_tool_item_new();
 	    gtk_toolbar_insert(GTK_TOOLBAR(toolbar), sep, -1);
@@ -134,11 +138,39 @@ class Gui {
 	                       
 	    GtkWidget *noApiKeyLabel = gtk_label_new("No youtube api key found. It should be a text file called key.txt in the application directory");
 		
+		vbCategories = gtk_vbox_new(false, 1);
+		gtk_widget_set_size_request(vbCategories, SIDE_SIZE, -1);
+		GtkWidget *spCategories = gtk_spinner_new();
+		gtk_widget_set_size_request(spCategories, SPINNER_SIZE, SPINNER_SIZE);
+		GtkWidget *swCategories = createScrolledWindow();
+		GtkWidget *tvCategories = createTreeView();
+		gtk_widget_show(swCategories);
+		gtk_widget_show(tvCategories);
+		gtk_container_add(GTK_CONTAINER(swCategories), tvCategories);
+		GtkWidget *btnCategoriesError = gtk_button_new_with_label("Retry");
+		g_signal_connect(btnCategoriesError,
+                         "clicked",
+                         G_CALLBACK(btnCategoriesErrorClicked), 
+                         NULL);
+                         
+        gtk_box_pack_start(GTK_BOX(vbCategories), spCategories, true, false, 1);
+        gtk_box_pack_start(GTK_BOX(vbCategories), swCategories, true, true, 1);
+        gtk_box_pack_start(GTK_BOX(vbCategories), btnCategoriesError, true, false, 1);
+		
+		GtkWidget *vbResults = gtk_vbox_new(false, 1);
+		gtk_box_pack_start(GTK_BOX(vbResults), swResults, true, true, 1);
+		gtk_box_pack_start(GTK_BOX(vbResults), hbResultsError, true, false, 1);
+		gtk_box_pack_start(GTK_BOX(vbResults), spResults, true, false, 1);
+		gtk_widget_show(vbResults);
+		
+		GtkWidget *hbox = gtk_hbox_new(false, 1);
+		gtk_box_pack_start(GTK_BOX(hbox), vbCategories, false, false, 1);
+		gtk_box_pack_start(GTK_BOX(hbox), vbResults, true, true, 1);
+		gtk_widget_show(hbox);
+		
 		vbox = gtk_vbox_new(false, 1);
 		gtk_box_pack_start(GTK_BOX(vbox), toolbar, false, false, 1);
-		gtk_box_pack_start(GTK_BOX(vbox), swResults, true, true, 1);
-		gtk_box_pack_start(GTK_BOX(vbox), hbResultsError, true, false, 1);
-		gtk_box_pack_start(GTK_BOX(vbox), spResults, true, false, 1);
+		gtk_box_pack_start(GTK_BOX(vbox), hbox, true, true, 1);
 		gtk_box_pack_start(GTK_BOX(vbox), noApiKeyLabel, true, false, 1);
 		
 		gtk_widget_show(vbox);
@@ -146,16 +178,18 @@ class Gui {
 		gtk_widget_show(window);
 		
 		if(apiKey.empty()) {
-		    gtk_widget_hide(swResults);
+		    gtk_widget_hide(hbox);
 		    gtk_widget_show(noApiKeyLabel);	
 		}
 		
-		ResultsView resultsView(swResults, spResults, hbResultsError, vbox);
+		ResultsView resultsView(swResults, spResults, hbResultsError, vbResults);
 		resultsModel = new ResultsModel(resultsStore, imagesCache);
 		ResultsParser resultsParser(resultsModel);
 		resultsNet = new ResultsNet(&resultsParser, apiKey);
 		resultsTask = new ResultsTask(&resultsView, resultsNet);
 		ImagesDownloader imagesDownloader(ivResults, imageIndices, imagesCache);
+		
+		categoriesView = new CategoriesView(spCategories, swCategories, btnCategoriesError);
 		
 		gtk_main();
 		
@@ -185,6 +219,32 @@ class Gui {
 	    gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(scrolledWindow),
 	                                        GTK_SHADOW_ETCHED_IN);
 	    return scrolledWindow;
+	}
+	
+	GtkWidget *createTreeView(void) {
+		GtkTreeViewColumn *col;
+		GtkCellRenderer *renderer;
+		GtkWidget *view;
+		
+		view = gtk_tree_view_new();
+		
+		renderer = gtk_cell_renderer_pixbuf_new();
+		col = gtk_tree_view_column_new_with_attributes ("Image", 
+		                                                renderer,
+	                                                    "pixbuf", 
+	                                                    IMAGE_COLUMN,
+	                                                    NULL);
+	    gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
+		
+	    renderer = gtk_cell_renderer_text_new();
+		col = gtk_tree_view_column_new_with_attributes ("Title", 
+		                                                renderer,
+	                                                    "text", 
+	                                                    TITLE_COLUMN,
+	                                                    NULL);
+	    gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
+		gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
+		return view;
 	}
     
     static void entryActivated(GtkWidget *widget, Gui *gui) {
@@ -245,11 +305,19 @@ class Gui {
 	}
 	
 	static void btnCategoriesClicked(GtkToggleToolButton *btnCategories, 
-	                                 gpointer data) {
+	                                 Gui *gui) {
+		gtk_widget_set_visible(gui->vbCategories, 
+		                       gtk_toggle_tool_button_get_active(btnCategories));
 		if(gtk_toggle_tool_button_get_active(btnCategories)) {
 			cout << "Show categories" << endl;
+			gui->categoriesView->showError();
 		}else {
 			cout << "Hide categories" << endl;
 		}	
+	}
+	
+	static void btnCategoriesErrorClicked(GtkWidget *widget, 
+	                                      gpointer data) {
+		cout << "Categories retry clicked" << endl;
 	}
 };
