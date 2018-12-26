@@ -24,11 +24,13 @@ class CategoriesView {
 		gtk_widget_hide(spCategories);
 		gtk_spinner_stop(GTK_SPINNER(spCategories));
 		gtk_widget_show(swCategories);
+		gtk_widget_hide(btnCategoriesError);
 	}
 	
 	void showError() {
 		gtk_widget_hide(spCategories);
 		gtk_spinner_stop(GTK_SPINNER(spCategories));
+		gtk_widget_hide(swCategories);
 		gtk_widget_show(btnCategoriesError);
 	}
 };
