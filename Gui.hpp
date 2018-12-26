@@ -9,6 +9,9 @@
 #include "ResultsTask.hpp"
 #include "ImagesDownloader.hpp"
 #include "CategoriesView.hpp"
+#include "CategoriesParser.hpp"
+#include "CategoriesNet.hpp"
+#include "CategoriesTask.hpp"
 
 class Gui {
 	ResultsModel *resultsModel;
@@ -17,6 +20,7 @@ class Gui {
 	set<int> *imageIndices;
 	GtkWidget *vbCategories;
 	CategoriesView *categoriesView;
+	CategoriesTask *categoriesTask;
     public:
     Gui(string apiKey) {
 		const string PROG_NAME("Simple youtube");
@@ -190,6 +194,9 @@ class Gui {
 		ImagesDownloader imagesDownloader(ivResults, imageIndices, imagesCache);
 		
 		categoriesView = new CategoriesView(spCategories, swCategories, btnCategoriesError);
+		CategoriesParser parser;
+		CategoriesNet categoriesNet(&parser, apiKey);
+	    categoriesTask = new CategoriesTask(categoriesView, &categoriesNet);
 		
 		gtk_main();
 		
@@ -310,7 +317,7 @@ class Gui {
 		                       gtk_toggle_tool_button_get_active(btnCategories));
 		if(gtk_toggle_tool_button_get_active(btnCategories)) {
 			cout << "Show categories" << endl;
-			gui->categoriesView->showError();
+			gui->categoriesTask->start();
 		}else {
 			cout << "Hide categories" << endl;
 		}	
